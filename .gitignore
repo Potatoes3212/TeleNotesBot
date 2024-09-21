@@ -15,3 +15,5 @@ __pycache__/
 
 # Игнорирование новых записей в папке exel_files
 exel_files/
+
+db.sqlite3
