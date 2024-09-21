@@ -1,0 +1,16 @@
+version: '3.9'
+
+services:
+  tele_notes_bot:
+    container_name: tele_notes_bot
+    build:
+      context: .
+    volumes:
+      - tele_notes_bot:/code 
+    restart: unless-stopped
+    env_file:
+      - .env  
+
+volumes:
+  tele_notes_bot:
+    driver: local
