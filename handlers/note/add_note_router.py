@@ -42,7 +42,8 @@ async def handle_user_note_message(message: Message, state: FSMContext):
         text = (f"Получена заметка:\n"
                 f"Тип: {content_info['content_type']}\n"
                 f"Подпись: {content_info['content_text'] if content_info['content_text'] else 'Отсутствует'}\n"
-                f"File ID: {content_info['file_id'] if content_info['file_id'] else 'Нет файла'}\n\n"
+                f"File ID: {content_info['file_id'] if content_info['file_id'] else 'Нет файла'}\n"
+                f"Ссылка в сообщении: {content_info['url'] if content_info['url'] else 'Нет ссылки'}\n\n"
                 f"Все ли верно?")
         await send_message_user(bot=bot, content_type=content_info['content_type'], content_text=text,
                                 user_id=message.from_user.id, file_id=content_info['file_id'],
@@ -59,7 +60,7 @@ async def handle_user_note_message(message: Message, state: FSMContext):
 async def confirm_add_note(message: Message, state: FSMContext):
     note = await state.get_data()
     await add_note(user_id=message.from_user.id, content_type=note.get('content_type'),
-                   content_text=note.get('content_text'), file_id=note.get('file_id'))
+                   content_text=note.get('content_text'), file_id=note.get('file_id'), url=note.get('url'))
     await message.answer('Заметка успешно добавлена!', reply_markup=main_note_kb())
     await state.clear()
 

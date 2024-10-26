@@ -39,8 +39,20 @@ def get_content_info(message: Message):
         content_type = "text"
 
     content_text = message.text or message.caption
-    return {'content_type': content_type, 'file_id': file_id, 'content_text': content_text}
+    url = get_url(message)
+    return {'content_type': content_type, 'file_id': file_id, 'content_text': content_text, 'url': url}
 
+def get_url(message: Message) -> str | None:
+    # Проверка, содержит ли сообщение URL среди entities
+    entities = message.entities if message.text else message.caption_entities
+    if entities:
+        for entity in entities:
+            if entity.type == "url":
+                text = message.text or message.caption
+                return text[entity.offset: entity.offset + entity.length]  # URL из текста
+            elif entity.type == "text_link" and entity.url:
+                return entity.url  # Прямой URL из text_link
+    return None
 
 async def send_message_user(bot, user_id, content_type, content_text=None, file_id=None, kb=None):
     if content_type == 'text':

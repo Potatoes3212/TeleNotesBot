@@ -4,6 +4,7 @@ from .models import User, Note
 from sqlalchemy import select
 from typing import List, Dict, Any, Optional
 from sqlalchemy.exc import SQLAlchemyError
+from uuid import UUID
 
 
 @connection
@@ -27,7 +28,7 @@ async def set_user(session, tg_id: int, username: str, full_name: str) -> Option
 
 @connection
 async def add_note(session, user_id: int, content_type: str,
-                   content_text: Optional[str] = None, file_id: Optional[str] = None) -> Optional[Note]:
+                   content_text: Optional[str] = None, file_id: Optional[str] = None, url: Optional[str] = None) -> Optional[Note]:
     try:
         user = await session.scalar(select(User).filter_by(id=user_id))
         if not user:
@@ -38,12 +39,14 @@ async def add_note(session, user_id: int, content_type: str,
             user_id=user_id,
             content_type=content_type,
             content_text=content_text,
-            file_id=file_id
+            file_id=file_id,
+            url=url
         )
 
         session.add(new_note)
         await session.commit()
-        logger.info(f"Заметка для пользователя с ID {user_id} успешно добавлена!")
+        logger.info(
+            f"Заметка для пользователя с ID {user_id} успешно добавлена!")
         return new_note
     except SQLAlchemyError as e:
         logger.error(f"Ошибка при добавлении заметки: {e}")
@@ -51,7 +54,7 @@ async def add_note(session, user_id: int, content_type: str,
 
 
 @connection
-async def update_text_note(session, note_id: int, content_text: str) -> Optional[Note]:
+async def update_note(session, note_id: UUID, content_text: str, content_type: str, file_id: str, url: Optional[str] = None) -> Optional[Note]:
     try:
         note = await session.scalar(select(Note).filter_by(id=note_id))
         if not note:
@@ -59,13 +62,17 @@ async def update_text_note(session, note_id: int, content_text: str) -> Optional
             return None
 
         note.content_text = content_text
+        note.content_type = content_type
+        note.file_id = file_id
+        note.url = url
+
         await session.commit()
         logger.info(f"Заметка с ID {note_id} успешно обновлена!")
         return note
     except SQLAlchemyError as e:
         logger.error(f"Ошибка при обновлении заметки: {e}")
         await session.rollback()
-
+        return None
 
 @connection
 async def get_notes_by_user(session, user_id: int, date_add: str = None, text_search: str = None,
@@ -89,13 +96,16 @@ async def get_notes_by_user(session, user_id: int, date_add: str = None, text_se
         ]
 
         if date_add:
-            note_list = [note for note in note_list if note['date_created'].strftime('%Y-%m-%d') == date_add]
+            note_list = [note for note in note_list if note['date_created'].strftime(
+                '%Y-%m-%d') == date_add]
 
         if text_search:
-            note_list = [note for note in note_list if text_search.lower() in (note['content_text'] or '').lower()]
+            note_list = [note for note in note_list if text_search.lower() in (
+                note['content_text'] or '').lower()]
 
         if content_type:
-            note_list = [note for note in note_list if note['content_type'] == content_type]
+            note_list = [
+                note for note in note_list if note['content_type'] == content_type]
 
         return note_list
     except SQLAlchemyError as e:
@@ -104,7 +114,7 @@ async def get_notes_by_user(session, user_id: int, date_add: str = None, text_se
 
 
 @connection
-async def get_note_by_id(session, note_id: int) -> Optional[Dict[str, Any]]:
+async def get_note_by_id(session, note_id: UUID) -> Optional[Dict[str, Any]]:
     try:
         note = await session.get(Note, note_id)
         if not note:
@@ -123,7 +133,7 @@ async def get_note_by_id(session, note_id: int) -> Optional[Dict[str, Any]]:
 
 
 @connection
-async def delete_note_by_id(session, note_id: int) -> Optional[Note]:
+async def delete_note_by_id(session, note_id: UUID) -> Optional[Note]:
     try:
         note = await session.get(Note, note_id)
         if not note:

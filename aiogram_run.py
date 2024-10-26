@@ -1,6 +1,5 @@
 import asyncio
 from create_bot import bot, dp, admins
-from data_base.base import create_tables
 from handlers.note.find_note_router import find_note_router
 from handlers.note.upd_note_router import upd_note_router
 from handlers.note.add_note_router import add_note_router
@@ -18,7 +17,6 @@ async def set_commands():
 # Функция, которая выполнится когда бот запустится
 async def start_bot():
     await set_commands()
-    await create_tables()
     for admin_id in admins:
         try:
             await bot.send_message(admin_id, f'Я запущен🥳.')

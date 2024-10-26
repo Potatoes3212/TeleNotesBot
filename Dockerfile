@@ -28,4 +28,4 @@ COPY . /code
 #Так как команда выполняется внутри директории /code, в которую мы поместили папку ./app с приложением, то Uvicorn сможет найти и импортировать объект app из файла app.main.
 EXPOSE 80
 #CMD ["ls"]
-CMD ["/bin/bash", "-c", "python aiogram_run.py"]
+CMD ["/bin/bash", "-c", "alembic upgrade head && python aiogram_run.py"]

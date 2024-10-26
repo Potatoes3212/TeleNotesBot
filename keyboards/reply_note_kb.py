@@ -55,7 +55,7 @@ def find_note_kb():
 
 def rule_note_kb(note_id: int):
     return InlineKeyboardMarkup(
-        inline_keyboard=[[InlineKeyboardButton(text="Изменить текст", callback_data=f"edit_note_text_{note_id}")],
+        inline_keyboard=[[InlineKeyboardButton(text="Изменить", callback_data=f"edit_note_text_{note_id}")],
                          [InlineKeyboardButton(text="Удалить", callback_data=f"dell_note_{note_id}")]])
 
 
