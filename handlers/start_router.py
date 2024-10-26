@@ -15,17 +15,14 @@ start_router = Router()
 @start_router.message(CommandStart())
 async def cmd_start(message: Message, state: FSMContext):
     await state.clear()
-    if message.from_user.id in admins:
-        user = await set_user(tg_id=message.from_user.id,
-                            username=message.from_user.username,
-                            full_name=message.from_user.full_name)
-        greeting = f"Привет, {message.from_user.full_name}! Выбери необходимое действие"
-        if user is None:
-            greeting = f"Привет, новый пользователь! Выбери необходимое действие"
+    user = await set_user(tg_id=message.from_user.id,
+                        username=message.from_user.username,
+                        full_name=message.from_user.full_name)
+    greeting = f"Привет, {message.from_user.full_name}! Выбери необходимое действие"
+    if user is None:
+        greeting = f"Привет, новый пользователь! Выбери необходимое действие"
 
-        await message.answer(greeting, reply_markup=main_kb())
-    else:
-        await message.answer('❌Уходи прочь❌')
+    await message.answer(greeting, reply_markup=main_kb())
 
 
 @start_router.message(F.text == '❌ Остановить сценарий')
