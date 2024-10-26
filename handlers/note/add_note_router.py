@@ -9,12 +9,42 @@ from keyboards.reply_note_kb import main_note_kb, add_note_check
 from keyboards.reply_other_kb import stop_fsm
 from utils.utils import get_content_info, send_message_user
 
+import json
+
 add_note_router = Router()
 
 
 class AddNoteStates(StatesGroup):
     content = State()  # Ожидаем любое сообщение от пользователя
     check_state = State()  # Финальна проверка
+
+
+@add_note_router.message(F.forward_origin)
+async def start_note(message: Message, state: FSMContext):
+    await state.clear()
+
+    message_dict = message.dict()  # Удалить
+    print(json.dumps(message_dict, indent=4, ensure_ascii=False))  # Удалить
+
+    content_info = get_content_info(message)
+    if content_info.get('content_type'):
+
+        text = (f"Получена заметка:\n"
+                f"Тип: {content_info['content_type']}\n"
+                f"Подпись: {content_info['content_text'] if content_info['content_text'] else 'Отсутствует'}\n"
+                f"File ID: {content_info['file_id'] if content_info['file_id'] else 'Нет файла'}\n"
+                f"Ссылка в сообщении: {content_info['url'] if content_info['url'] else 'Нет ссылки'}")
+        await send_message_user(bot=bot, content_type=content_info['content_type'], content_text=text,
+                                user_id=message.from_user.id, file_id=content_info['file_id'])
+        
+        await add_note(user_id=message.from_user.id, content_type=content_info.get('content_type'),
+                content_text=content_info.get('content_text'), file_id=content_info.get('file_id'), url=content_info.get('url'))
+        await message.answer('Заметка успешно добавлена!', reply_markup=main_note_kb())
+
+    else:
+        await message.answer(
+            'Я не знаю как работать с таким медафайлом, как ты скинул. Давай что-то другое, ок?'
+        )
 
 
 @add_note_router.message(F.text == '📝 Заметки')
@@ -35,6 +65,10 @@ async def start_add_note(message: Message, state: FSMContext):
 
 @add_note_router.message(AddNoteStates.content)
 async def handle_user_note_message(message: Message, state: FSMContext):
+
+    message_dict = message.dict()
+    print(json.dumps(message_dict, indent=4, ensure_ascii=False))
+
     content_info = get_content_info(message)
     if content_info.get('content_type'):
         await state.update_data(**content_info)
