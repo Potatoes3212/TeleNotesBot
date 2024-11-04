@@ -1,6 +1,6 @@
 from create_bot import logger
-from .base import connection
-from .models import User, Note
+from data_base.base import connection
+from data_base.models import User, Note
 from sqlalchemy import select
 from typing import List, Dict, Any, Optional
 from sqlalchemy.exc import SQLAlchemyError

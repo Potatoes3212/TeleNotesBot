@@ -2,9 +2,8 @@ from aiogram import Router, F
 from aiogram.filters import CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
-from data_base.dao import set_user
-from keyboards.reply_other_kb import main_kb
-from create_bot import admins
+from data_base.dao.note_dao import set_user
+from keyboards.mode_select_kb import main_kb
 
 
 start_router = Router()

@@ -3,6 +3,11 @@ from create_bot import bot, dp, admins
 from handlers.note.find_note_router import find_note_router
 from handlers.note.upd_note_router import upd_note_router
 from handlers.note.add_note_router import add_note_router
+
+from handlers.repost.add_repost_router import add_repost_router
+from handlers.repost.find_repost_router import find_repost_router
+from handlers.repost.upd_repost_router import upd_repost_router
+
 from aiogram.types import BotCommand, BotCommandScopeDefault
 
 from handlers.start_router import start_router
@@ -19,7 +24,7 @@ async def start_bot():
     await set_commands()
     for admin_id in admins:
         try:
-            await bot.send_message(admin_id, f'Я запущен🥳.')
+            await bot.send_message(admin_id, f'Я запущен🥳')
         except:
             pass
 
@@ -39,6 +44,9 @@ async def main():
     dp.include_router(add_note_router)
     dp.include_router(find_note_router)
     dp.include_router(upd_note_router)
+    dp.include_router(find_repost_router)
+    dp.include_router(add_repost_router)
+    dp.include_router(upd_repost_router)
 
     # регистрация функций
     dp.startup.register(start_bot)
