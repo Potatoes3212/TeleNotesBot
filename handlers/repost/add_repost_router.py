@@ -23,7 +23,7 @@ class AddRepostStates(StatesGroup):
 @add_repost_router.message(F.text == '🤘🏿 Репосты')
 async def start_repost(message: Message, state: FSMContext):
     await state.clear()
-    await message.answer('Ты в меню Репостов. Выбери необходимое действие.',
+    await message.answer('Ты в меню репостов. Выбери необходимое действие.',
                          reply_markup=main_repost_kb())
 
 
