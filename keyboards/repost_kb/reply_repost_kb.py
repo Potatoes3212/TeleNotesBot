@@ -40,10 +40,14 @@ def main_repost_kb():
 
 
 def find_repost_kb():
+    # kb_list = [
+    #     [KeyboardButton(text="📦 Все репосты"), KeyboardButton(text="📅 По дате добавления репоста")],
+    #     [KeyboardButton(text="🔍 Поиск по тексту репоста"), KeyboardButton(text="📝 По типу контента репоста")],
+    #     [KeyboardButton(text="🌚 По источнику репсота")],
+    #     [KeyboardButton(text="🏠 Главное меню")]
+    # ]
     kb_list = [
-        [KeyboardButton(text="📦 Все репосты"), KeyboardButton(text="📅 По дате добавления репоста")],
-        [KeyboardButton(text="🔍 Поиск по тексту репоста"), KeyboardButton(text="📝 По типу контента репоста")],
-        [KeyboardButton(text="🌚 По источнику репсота")],
+        [KeyboardButton(text="📦 Все репосты")],
         [KeyboardButton(text="🏠 Главное меню")]
     ]
     return ReplyKeyboardMarkup(

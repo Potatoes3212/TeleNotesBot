@@ -27,6 +27,8 @@ async def all_views_reposts(message: Message, state: FSMContext):
     if all_reposts:
         await send_many_reposts(all_reposts, bot, message.from_user.id)
         await message.answer(f'Отправлено репостов: {len(all_reposts)}', reply_markup=main_repost_kb())
+    else:
+        await message.answer('У вас пока нет репостов.', reply_markup=main_repost_kb())
 
 
 @find_repost_router.message(F.text == '📅 По дате добавления')
