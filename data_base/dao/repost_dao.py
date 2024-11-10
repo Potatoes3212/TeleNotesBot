@@ -8,8 +8,8 @@ from uuid import UUID
 
 
 @connection
-async def add_repost(session, user_id: int,origin: str,  content_type: str,
-                   content_text: Optional[str] = None, file_id: Optional[str] = None, url: Optional[str] = None) -> Optional[Repost]:
+async def add_repost(session, user_id: int, origin: str,  content_type: str,
+                     content_text: Optional[str] = None, file_id: Optional[str] = None, url: Optional[str] = None) -> Optional[Repost]:
     try:
         user = await session.scalar(select(User).filter_by(id=user_id))
         if not user:
@@ -37,7 +37,7 @@ async def add_repost(session, user_id: int,origin: str,  content_type: str,
 
 @connection
 async def get_reposts_by_user(session, user_id: int, date_add: str = None, text_search: str = None,
-                              content_type: str = None) -> List[Repost]:
+                              content_type: str = None, origin: str = None) -> List[Repost]:
     try:
         result = await session.execute(select(Repost).filter_by(user_id=user_id))
         reposts = result.scalars().all()
@@ -64,6 +64,12 @@ async def get_reposts_by_user(session, user_id: int, date_add: str = None, text_
                 repost for repost in reposts if repost.content_type == content_type
             ]
 
+        # Фильтрация по источнику
+        if origin:
+            reposts = [
+                repost for repost in reposts if origin == repost.origin
+            ]
+
         return reposts
     except SQLAlchemyError as e:
         logger.error(f"Ошибка при получении репостов: {e}")
@@ -79,9 +85,23 @@ async def get_repost_by_id(session, repost_id: UUID) -> Optional[Repost]:
             return None
 
         return repost
-    
+
     except SQLAlchemyError as e:
         logger.error(f"Ошибка при получении заметки: {e}")
+        return None
+
+
+@connection
+async def get_origins_by_user(session, user_id: int):
+    try:
+        result = await session.execute(select(Repost.origin).distinct().where(Repost.user_id == user_id))
+        reposts_origin = result.scalars().all()
+        if not reposts_origin:
+            logger.info(f"Нет репостов для пользователя {user_id}")
+            return None
+        return reposts_origin
+    except SQLAlchemyError as e:
+        logger.error(f"Ошибка получения источников репостов: {e}")
         return None
 
 
