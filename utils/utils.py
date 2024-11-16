@@ -41,12 +41,19 @@ def get_content_info(message: Message):
     elif message.text:
         content_type = "text"
 
+    # Получние истоничка репоста
     if message.forward_from_chat and message.forward_from_chat.title:
         origin = message.forward_origin.chat.title
     else:
         origin = None
 
-    return {'content_type': content_type, 'file_id': file_id, 'content_text': content_text, 'origin': origin, 'url': url}
+    # Получение сслыки на оригинал репоста
+    if message.forward_from_chat.username and message.forward_from_message_id:
+        origin_url = f"https://t.me/{message.forward_from_chat.username}/{message.forward_from_message_id}"
+    else:
+        origin_url = None
+
+    return {'content_type': content_type, 'file_id': file_id, 'content_text': content_text, 'origin': origin, 'url': url, 'origin_url': origin_url}
 
 def get_url(message: Message) -> str | None:
     # Проверка, содержит ли сообщение URL среди entities

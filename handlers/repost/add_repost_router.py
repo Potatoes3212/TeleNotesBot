@@ -1,3 +1,4 @@
+from create_bot import logger
 from aiogram import Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
@@ -31,11 +32,17 @@ async def start_repost(message: Message, state: FSMContext):
 async def start_note(message: Message, state: FSMContext):
     await state.clear()
 
+    # Debug
+    logger.info(f'Получено сообщение: \n{message.model_dump_json(indent=2)}')
+    logger.info(
+        f"Ссылка на сообщение: \nhttps://t.me/{message.forward_from_chat.username}/{message.forward_from_message_id}")
+
     content_info = get_content_info(message)
 
     if content_info.get('content_type'):
         text = (f"<b>Получен репост</b>\n"
                 f"Источник: {content_info['origin']}\n"
+                f"Ссылка на оригинальный пост:{content_info['origin_url']}\n"
                 f"Тип: {content_info['content_type']}\n"
                 f"Подпись: {content_info['content_text'] if content_info['content_text'] else 'Отсутствует'}\n"
                 f"File ID: {content_info['file_id'] if content_info['file_id'] else 'Нет файла'}\n"
