@@ -36,15 +36,15 @@ async def edit_note_text_process(call: CallbackQuery, state: FSMContext):
 @upd_note_router.message(UPDNoteStates.content)
 async def confirm_edit_note_text(message: Message, state: FSMContext):
     content_info = get_content_info(message)
-    if content_info.get('content_type'):
+    if content_info.content_type:
 
         note_id = (await state.get_data()).get('note_id') 
         await update_note(
             note_id=note_id,
-            content_text=content_info.get('content_text'),
-            content_type=content_info.get('content_type'),
-            file_id=content_info.get('file_id'),
-            url=content_info.get('url')
+            content_text=content_info.content_text,
+            content_type=content_info.content_type,
+            file_id=content_info.file_id,
+            url=content_info.url
         )
         await state.clear()
         await message.answer(f"Заметка с ID {note_id} успешно обновлена!", reply_markup=main_note_kb())

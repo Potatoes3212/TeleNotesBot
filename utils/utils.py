@@ -5,19 +5,22 @@ from aiogram.types import Message
 
 from keyboards.note_kb.reply_note_kb import rule_note_kb
 from keyboards.repost_kb.reply_repost_kb import del_repost_kb
+from models.logic_models import ContentInfo
 
 
 def transform_string(input_string):
     # Разделяем строку по запятым
     words = input_string.split(',')
     # Убираем лишние пробелы, приводим к нижнему регистру и заменяем множественные пробелы на один
-    cleaned_words = [re.sub(' +', ' ', word.strip().lower()) for word in words if word.strip()]
+    cleaned_words = [re.sub(' +', ' ', word.strip().lower())
+                     for word in words if word.strip()]
     # Объединяем слова обратно в строку через запятую
     result = ','.join(cleaned_words)
     return result
 
 
 def get_content_info(message: Message):
+
     content_type = None
     file_id = None
     content_text = message.text or message.caption
@@ -48,12 +51,21 @@ def get_content_info(message: Message):
         origin = None
 
     # Получение сслыки на оригинал репоста
-    if message.forward_from_chat.username and message.forward_from_message_id:
+    if message.forward_from_chat and message.forward_from_chat.username and message.forward_from_message_id:
         origin_url = f"https://t.me/{message.forward_from_chat.username}/{message.forward_from_message_id}"
     else:
         origin_url = None
 
-    return {'content_type': content_type, 'file_id': file_id, 'content_text': content_text, 'origin': origin, 'url': url, 'origin_url': origin_url}
+    content_info = ContentInfo(
+        content_type=content_type,
+        file_id=file_id,
+        content_text=content_text,
+        url=url, origin=origin,
+        origin_url=origin_url
+    )
+
+    return content_info
+
 
 def get_url(message: Message) -> str | None:
     # Проверка, содержит ли сообщение URL среди entities
@@ -62,10 +74,12 @@ def get_url(message: Message) -> str | None:
         for entity in entities:
             if entity.type == "url":
                 text = message.text or message.caption
-                return text[entity.offset: entity.offset + entity.length]  # URL из текста
+                # URL из текста
+                return text[entity.offset: entity.offset + entity.length]
             elif entity.type == "text_link" and entity.url:
                 return entity.url  # Прямой URL из text_link
     return None
+
 
 async def send_message_user(bot, user_id, content_type, content_text=None, file_id=None, kb=None):
     if content_type == 'text':
@@ -101,7 +115,7 @@ async def send_many_reposts(all_reposts, bot, user_id):
     for repost in all_reposts:
         try:
             await send_message_user(bot=bot, content_type=repost.content_type,
-                                    content_text=repost.content_text,
+                                    content_text=create_repost_sending_text(repost),
                                     user_id=user_id,
                                     file_id=repost.file_id,
                                     kb=del_repost_kb(repost.id))
@@ -110,3 +124,14 @@ async def send_many_reposts(all_reposts, bot, user_id):
             await asyncio.sleep(2)
         finally:
             await asyncio.sleep(0.5)
+
+def create_repost_sending_text(repost):
+    text = (f"<b>Дата сохранения репоста {repost.created_at.strftime('%Y-%m-%d') }</b>\n"
+        f"Источник: {repost.origin}\n"
+        f"Ссылка на оригинальный пост:\n{repost.origin_url if repost.origin_url else 'Не сохранена'}\n"
+        f"Тип: {repost.content_type}\n"
+        f"Подпись: {repost.content_text if repost.content_text else 'Отсутствует'}\n"
+        # f"File ID: {repost.file_id if repost.file_id else 'Нет файла'}\n"
+        f"Ссылка в сообщении: {repost.url if repost.url else 'Нет ссылки'}")
+    
+    return text

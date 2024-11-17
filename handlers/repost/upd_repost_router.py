@@ -5,8 +5,6 @@ from aiogram.types import Message, CallbackQuery
 from data_base.dao.repost_dao import delete_repost_by_id
 from keyboards.note_kb.reply_note_kb import main_note_kb
 
-from utils.utils import get_content_info
-
 upd_repost_router = Router()
 
 

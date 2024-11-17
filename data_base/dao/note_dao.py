@@ -7,7 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from uuid import UUID
 
 
-@connection
+@connection()
 async def set_user(session, tg_id: int, username: str, full_name: str) -> Optional[User]:
     try:
         user = await session.scalar(select(User).filter_by(id=tg_id))
@@ -26,7 +26,7 @@ async def set_user(session, tg_id: int, username: str, full_name: str) -> Option
         await session.rollback()
 
 
-@connection
+@connection()
 async def add_note(session, user_id: int, content_type: str,
                    content_text: Optional[str] = None, file_id: Optional[str] = None, url: Optional[str] = None) -> Optional[Note]:
     try:
@@ -53,7 +53,7 @@ async def add_note(session, user_id: int, content_type: str,
         await session.rollback()
 
 
-@connection
+@connection()
 async def update_note(session, note_id: UUID, content_text: str, content_type: str, file_id: str, url: Optional[str] = None) -> Optional[Note]:
     try:
         note = await session.scalar(select(Note).filter_by(id=note_id))
@@ -74,7 +74,7 @@ async def update_note(session, note_id: UUID, content_text: str, content_type: s
         await session.rollback()
         return None
 
-@connection
+@connection()
 async def get_notes_by_user(session, user_id: int, date_add: str = None, text_search: str = None,
                             content_type: str = None) -> List[Dict[str, Any]]:
     try:
@@ -113,7 +113,7 @@ async def get_notes_by_user(session, user_id: int, date_add: str = None, text_se
         return []
 
 
-@connection
+@connection()
 async def get_note_by_id(session, note_id: UUID) -> Optional[Dict[str, Any]]:
     try:
         note = await session.get(Note, note_id)
@@ -132,7 +132,7 @@ async def get_note_by_id(session, note_id: UUID) -> Optional[Dict[str, Any]]:
         return None
 
 
-@connection
+@connection()
 async def delete_note_by_id(session, note_id: UUID) -> Optional[Note]:
     try:
         note = await session.get(Note, note_id)

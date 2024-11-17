@@ -35,4 +35,5 @@ class Repost(Base):
     content_text: Mapped[str] = mapped_column(Text, nullable=True)
     file_id: Mapped[str] = mapped_column(String, nullable=True)
     url: Mapped[str] = mapped_column(String, nullable=True)
+    origin_url: Mapped[str] = mapped_column(String, nullable=True)
     user: Mapped["User"] = relationship("User", back_populates="reposts")

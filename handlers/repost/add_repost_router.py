@@ -6,8 +6,7 @@ from aiogram.types import Message
 
 from create_bot import bot
 from data_base.dao.repost_dao import add_repost
-from keyboards.repost_kb.reply_repost_kb import main_repost_kb, find_repost_kb
-from keyboards.mode_select_kb import stop_fsm
+from keyboards.repost_kb.reply_repost_kb import main_repost_kb
 from utils.utils import get_content_info, send_message_user
 
 
@@ -33,52 +32,28 @@ async def start_note(message: Message, state: FSMContext):
     await state.clear()
 
     # Debug
-    logger.info(f'Получено сообщение: \n{message.model_dump_json(indent=2)}')
-    logger.info(
-        f"Ссылка на сообщение: \nhttps://t.me/{message.forward_from_chat.username}/{message.forward_from_message_id}")
+    # logger.info(f'Получено сообщение: \n{message.model_dump_json(indent=2)}')
+    # logger.info(
+    #     f"Ссылка на сообщение: \nhttps://t.me/{message.forward_from_chat.username}/{message.forward_from_message_id}")
 
     content_info = get_content_info(message)
 
-    if content_info.get('content_type'):
+    if content_info.content_type:
         text = (f"<b>Получен репост</b>\n"
-                f"Источник: {content_info['origin']}\n"
-                f"Ссылка на оригинальный пост:{content_info['origin_url']}\n"
-                f"Тип: {content_info['content_type']}\n"
-                f"Подпись: {content_info['content_text'] if content_info['content_text'] else 'Отсутствует'}\n"
-                f"File ID: {content_info['file_id'] if content_info['file_id'] else 'Нет файла'}\n"
-                f"Ссылка в сообщении: {content_info['url'] if content_info['url'] else 'Нет ссылки'}")
-        await send_message_user(bot=bot, content_type=content_info['content_type'], content_text=text,
-                                user_id=message.from_user.id, file_id=content_info['file_id'])
+                f"Источник: {content_info.origin}\n"
+                f"Ссылка на оригинальный пост:{content_info.origin_url}\n"
+                f"Тип: {content_info.content_type}\n"
+                f"Подпись: {content_info.content_text if content_info.content_text else 'Отсутствует'}\n"
+                f"File ID: {content_info.file_id if content_info.file_id else 'Нет файла'}\n"
+                f"Ссылка в сообщении: {content_info.url if content_info.url else 'Нет ссылки'}")
+        await send_message_user(bot=bot, content_type=content_info.content_type, content_text=text,
+                                user_id=message.from_user.id, file_id=content_info.file_id)
 
-        await add_repost(user_id=message.from_user.id, origin=content_info.get('origin'), content_type=content_info.get('content_type'),
-                         content_text=content_info.get('content_text'), file_id=content_info.get('file_id'), url=content_info.get('url'))
+        await add_repost(user_id=message.from_user.id, origin=content_info.origin, content_type=content_info.content_type,
+                         content_text=content_info.content_text, file_id=content_info.file_id, origin_url=content_info.origin_url, url=content_info.url)
         await message.answer('<b>Репост успешно доабвлен!</b>', parse_mode='HTML', reply_markup=main_repost_kb())
 
     else:
         await message.answer(
             'Я не знаю как работать с таким медафайлом, как ты скинул. Давай что-то другое, ок?'
         )
-
-
-@add_repost_router.message(AddRepostStates.content)
-async def handle_user_note_message(message: Message, state: FSMContext):
-
-    content_info = get_content_info(message)
-    if content_info.get('content_type'):
-        await state.update_data(**content_info)
-
-        text = (f"Получена заметка:\n"
-                f"Тип: {content_info['content_type']}\n"
-                f"Подпись: {content_info['content_text'] if content_info['content_text'] else 'Отсутствует'}\n"
-                f"File ID: {content_info['file_id'] if content_info['file_id'] else 'Нет файла'}\n"
-                f"Ссылка в сообщении: {content_info['url'] if content_info['url'] else 'Нет ссылки'}\n\n"
-                f"Все ли верно?")
-        await send_message_user(bot=bot, content_type=content_info['content_type'], content_text=text,
-                                user_id=message.from_user.id, file_id=content_info['file_id'],
-                                kb=main_repost_kb())
-        await state.set_state(AddRepostStates.check_state)
-    else:
-        await message.answer(
-            'Я не знаю как работать с таким медафайлом, как ты скинул. Давай что-то другое, ок?'
-        )
-        await state.set_state(AddRepostStates.content)

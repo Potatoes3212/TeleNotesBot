@@ -2,14 +2,14 @@ from create_bot import logger
 from data_base.base import connection
 from data_base.models import User, Repost
 from sqlalchemy import select
-from typing import List, Dict, Any, Optional
+from typing import List, Optional
 from sqlalchemy.exc import SQLAlchemyError
 from uuid import UUID
 
 
-@connection
+@connection()
 async def add_repost(session, user_id: int, origin: str,  content_type: str,
-                     content_text: Optional[str] = None, file_id: Optional[str] = None, url: Optional[str] = None) -> Optional[Repost]:
+                     content_text: Optional[str] = None, file_id: Optional[str] = None, origin_url: Optional[str] = None, url: Optional[str] = None) -> Optional[Repost]:
     try:
         user = await session.scalar(select(User).filter_by(id=user_id))
         if not user:
@@ -22,6 +22,7 @@ async def add_repost(session, user_id: int, origin: str,  content_type: str,
             content_type=content_type,
             content_text=content_text,
             file_id=file_id,
+            origin_url = origin_url,
             url=url
         )
 
@@ -35,7 +36,7 @@ async def add_repost(session, user_id: int, origin: str,  content_type: str,
         await session.rollback()
 
 
-@connection
+@connection()
 async def get_reposts_by_user(session, user_id: int, date_add: str = None, text_search: str = None,
                               content_type: str = None, origin: str = None) -> List[Repost]:
     try:
@@ -76,22 +77,20 @@ async def get_reposts_by_user(session, user_id: int, date_add: str = None, text_
         return []
 
 
-@connection
+@connection()
 async def get_repost_by_id(session, repost_id: UUID) -> Optional[Repost]:
     try:
         repost = await session.get(Repost, repost_id)
         if not repost:
             logger.info(f"Репост с ID {repost_id} не найдена.")
             return None
-
         return repost
-
     except SQLAlchemyError as e:
         logger.error(f"Ошибка при получении заметки: {e}")
         return None
 
 
-@connection
+@connection()
 async def get_origins_by_user(session, user_id: int):
     try:
         result = await session.execute(select(Repost.origin).distinct().where(Repost.user_id == user_id))
@@ -105,7 +104,7 @@ async def get_origins_by_user(session, user_id: int):
         return None
 
 
-@connection
+@connection()
 async def delete_repost_by_id(session, repost_id: UUID) -> Optional[Repost]:
     try:
         repost = await session.get(Repost, repost_id)

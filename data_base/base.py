@@ -1,14 +1,26 @@
-from .database import async_session, engine, Base
+from functools import wraps
+from sqlalchemy import text
 
+from .database import async_session
 
-def connection(func):
-    async def wrapper(*args, **kwargs):
-        async with async_session() as session:
-            return await func(session, *args, **kwargs)
+def connection(isolation_level=None):
+    def decorator(method):
+        @wraps(method)
+        async def wrapper(*args, **kwargs):
+            async with async_session() as session:
+                try:
+                    # Устанавливаем уровень изоляции, если передан
+                    if isolation_level:
+                        await session.execute(text(f"SET TRANSACTION ISOLATION LEVEL {isolation_level}"))
 
-    return wrapper
+                    # Выполняем декорированный метод
+                    return await method(session=session,*args,  **kwargs)
+                except Exception as e:
+                    await session.rollback()  # Откатываем сессию при ошибке
+                    raise e  # Поднимаем исключение дальше
+                finally:
+                    await session.close()  # Закрываем сессию
 
+        return wrapper
 
-# async def create_tables():
-#     async with engine.begin() as conn:
-#         await conn.run_sync(Base.metadata.create_all)
+    return decorator
