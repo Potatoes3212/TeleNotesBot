@@ -2,7 +2,7 @@ import asyncio
 import re
 
 from aiogram.types import Message
-
+from typing import Optional
 from keyboards.note_kb.reply_note_kb import rule_note_kb
 from keyboards.repost_kb.reply_repost_kb import del_repost_kb
 from models.logic_models import ContentInfo
@@ -115,7 +115,8 @@ async def send_many_reposts(all_reposts, bot, user_id):
     for repost in all_reposts:
         try:
             await send_message_user(bot=bot, content_type=repost.content_type,
-                                    content_text=create_repost_sending_text(repost),
+                                    content_text=create_repost_sending_text(
+                                        repost=repost),
                                     user_id=user_id,
                                     file_id=repost.file_id,
                                     kb=del_repost_kb(repost.id))
@@ -125,13 +126,28 @@ async def send_many_reposts(all_reposts, bot, user_id):
         finally:
             await asyncio.sleep(0.5)
 
-def create_repost_sending_text(repost):
-    text = (f"<b>Дата сохранения репоста {repost.created_at.strftime('%Y-%m-%d') }</b>\n"
-        f"Источник: {repost.origin}\n"
-        f"Ссылка на оригинальный пост:\n{repost.origin_url if repost.origin_url else 'Не сохранена'}\n"
-        f"Тип: {repost.content_type}\n"
-        f"Подпись: {repost.content_text if repost.content_text else 'Отсутствует'}\n"
-        # f"File ID: {repost.file_id if repost.file_id else 'Нет файла'}\n"
-        f"Ссылка в сообщении: {repost.url if repost.url else 'Нет ссылки'}")
-    
-    return text
+
+def create_repost_sending_text(repost, title: Optional[str] = None) -> str:
+
+    text = []
+
+    if title:
+        text.append(f'<b>{title}</b>')
+
+    if repost.origin:
+        text.append(f'Источник: {repost.origin}')
+
+    if repost.origin_url:
+        text.append(
+            f'<a href="{repost.origin_url}">Ссылка на оригинальный пост</a>')
+
+    if repost.content_text:
+        text.append(f"Подпись: {repost.content_text}")
+
+    if repost.url:
+        text.append(f"Ссылка в сообщении: {repost.url}")
+
+    text.append(
+        f"<b>Дата сохранения репоста: {repost.created_at.strftime('%Y-%m-%d') }</b>")
+
+    return '\n'.join(text)

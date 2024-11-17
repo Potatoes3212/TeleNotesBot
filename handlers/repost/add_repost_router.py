@@ -7,7 +7,7 @@ from aiogram.types import Message
 from create_bot import bot
 from data_base.dao.repost_dao import add_repost
 from keyboards.repost_kb.reply_repost_kb import main_repost_kb
-from utils.utils import get_content_info, send_message_user
+from utils.utils import get_content_info, send_message_user, create_repost_sending_text
 
 
 add_repost_router = Router()
@@ -39,18 +39,15 @@ async def start_note(message: Message, state: FSMContext):
     content_info = get_content_info(message)
 
     if content_info.content_type:
-        text = (f"<b>Получен репост</b>\n"
-                f"Источник: {content_info.origin}\n"
-                f"Ссылка на оригинальный пост:{content_info.origin_url}\n"
-                f"Тип: {content_info.content_type}\n"
-                f"Подпись: {content_info.content_text if content_info.content_text else 'Отсутствует'}\n"
-                f"File ID: {content_info.file_id if content_info.file_id else 'Нет файла'}\n"
-                f"Ссылка в сообщении: {content_info.url if content_info.url else 'Нет ссылки'}")
-        await send_message_user(bot=bot, content_type=content_info.content_type, content_text=text,
-                                user_id=message.from_user.id, file_id=content_info.file_id)
 
-        await add_repost(user_id=message.from_user.id, origin=content_info.origin, content_type=content_info.content_type,
-                         content_text=content_info.content_text, file_id=content_info.file_id, origin_url=content_info.origin_url, url=content_info.url)
+        new_repost = await add_repost(user_id=message.from_user.id, origin=content_info.origin, content_type=content_info.content_type,
+                                      content_text=content_info.content_text, file_id=content_info.file_id, origin_url=content_info.origin_url, url=content_info.url)
+
+        text = create_repost_sending_text(repost=new_repost, title='Получен репост!')
+
+        await send_message_user(bot=bot, content_type=new_repost.content_type, content_text=text,
+                                user_id=message.from_user.id, file_id=new_repost.file_id)
+
         await message.answer('<b>Репост успешно доабвлен!</b>', parse_mode='HTML', reply_markup=main_repost_kb())
 
     else:
