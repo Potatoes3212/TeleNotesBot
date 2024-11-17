@@ -48,7 +48,7 @@ async def start_note(message: Message, state: FSMContext):
         await send_message_user(bot=bot, content_type=new_repost.content_type, content_text=text,
                                 user_id=message.from_user.id, file_id=new_repost.file_id)
 
-        await message.answer('<b>Репост успешно доабвлен!</b>', parse_mode='HTML', reply_markup=main_repost_kb())
+        await message.answer('<b>Репост успешно добавлен!</b>', parse_mode='HTML', reply_markup=main_repost_kb())
 
     else:
         await message.answer(
