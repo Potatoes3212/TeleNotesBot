@@ -51,4 +51,4 @@ async def defwievs_reposts_by_origin(call: CallbackQuery, state: FSMContext):
     reposts_by_origin = await get_reposts_by_user(
         user_id=call.from_user.id, origin=origin)
     await send_many_reposts(reposts_by_origin, bot, call.from_user.id)
-    await call.message.answer(text=f'Отправлены все репосты от автора:\n"{origin}"\nВсего репостов: {len(reposts_by_origin)}', reply_markup=main_repost_kb())
+    await call.message.answer(text=f'Отправлены все репосты от автора:\n"{reposts_by_origin[0].origin}"\nВсего репостов: {len(reposts_by_origin)}', reply_markup=main_repost_kb())

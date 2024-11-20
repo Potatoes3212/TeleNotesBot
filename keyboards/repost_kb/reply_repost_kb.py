@@ -5,7 +5,6 @@ from typing import List
 from create_bot import logger
 
 
-
 # def generate_date_keyboard(notes):
 #     unique_dates = {note['date_created'].strftime('%Y-%m-%d') for note in notes}
 #     keyboard = InlineKeyboardMarkup(inline_keyboard=[])
@@ -32,16 +31,16 @@ from create_bot import logger
 def generate_origins_repost_keyboard(origins: List[str]) -> InlineKeyboardMarkup:
     keyboard = InlineKeyboardMarkup(inline_keyboard=[])
     for origin in origins:
+        if len(origin) > 30:
+            origin = origin[:30]
         button = InlineKeyboardButton(
             text=origin, callback_data=f"repost_origin_{origin}")
-        # Отладка конопок 
-        logger.info(f"repost_origin_{origin}") 
 
         keyboard.inline_keyboard.append([button])
 
     keyboard.inline_keyboard.append([InlineKeyboardButton(
         text="Главное меню", callback_data="main_menu")])
-    
+
     return keyboard
 
 

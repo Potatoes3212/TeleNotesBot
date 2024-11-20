@@ -68,7 +68,7 @@ async def get_reposts_by_user(session, user_id: int, date_add: str = None, text_
         # Фильтрация по источнику
         if origin:
             reposts = [
-                repost for repost in reposts if origin == repost.origin
+                repost for repost in reposts if origin in repost.origin
             ]
 
         return reposts
