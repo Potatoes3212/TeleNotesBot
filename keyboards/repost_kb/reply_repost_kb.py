@@ -2,6 +2,9 @@ from aiogram.types import KeyboardButton, ReplyKeyboardMarkup
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from typing import List
 
+from create_bot import logger
+
+
 
 # def generate_date_keyboard(notes):
 #     unique_dates = {note['date_created'].strftime('%Y-%m-%d') for note in notes}
@@ -31,6 +34,9 @@ def generate_origins_repost_keyboard(origins: List[str]) -> InlineKeyboardMarkup
     for origin in origins:
         button = InlineKeyboardButton(
             text=origin, callback_data=f"repost_origin_{origin}")
+        # Отладка конопок 
+        logger.info(f"repost_origin_{origin}") 
+
         keyboard.inline_keyboard.append([button])
 
     keyboard.inline_keyboard.append([InlineKeyboardButton(

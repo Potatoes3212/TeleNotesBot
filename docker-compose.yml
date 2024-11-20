@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   tele_notes_bot:
     container_name: tele_notes_bot
