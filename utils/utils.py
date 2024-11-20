@@ -135,17 +135,24 @@ def create_repost_sending_text(repost, title: Optional[str] = None) -> str:
         text.append(f'<b>{title}</b>')
 
     if repost.origin:
-        text.append(f'Источник: {repost.origin}')
+        text.append(f'<b>Источник:</b> {repost.origin}')
 
     if repost.origin_url:
+
         text.append(
             f'<a href="{repost.origin_url}">Ссылка на оригинальный пост</a>')
 
     if repost.content_text:
-        text.append(f"Подпись: {repost.content_text}")
+
+        content_text = repost.content_text
+
+        if len(content_text) > 600:
+            content_text = content_text[:600] + "...\nполный текст в источнике"
+
+        text.append(f"<b>Подпись:</b> \n{content_text}")
 
     if repost.url:
-        text.append(f"Ссылка в сообщении: {repost.url}")
+        text.append(f"<b>Ссылка в сообщении:</b> {repost.url}")
 
     text.append(
         f"<b>Дата сохранения репоста: {repost.created_at.strftime('%Y-%m-%d') }</b>")
