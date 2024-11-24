@@ -6,6 +6,8 @@ from typing import Optional
 from keyboards.note_kb.reply_note_kb import rule_note_kb
 from keyboards.repost_kb.reply_repost_kb import del_repost_kb
 from models.logic_models import ContentInfo
+from operator import attrgetter
+from create_bot import logger
 
 
 def transform_string(input_string):
@@ -112,7 +114,11 @@ async def send_many_notes(all_notes, bot, user_id):
 
 
 async def send_many_reposts(all_reposts, bot, user_id):
+
+    all_reposts.sort(key=attrgetter('created_at'))
+
     for repost in all_reposts:
+        logger.info(f'{repost.created_at}: {type(repost.created_at)}')
         try:
             await send_message_user(bot=bot, content_type=repost.content_type,
                                     content_text=create_repost_sending_text(
