@@ -27,6 +27,7 @@ def get_content_info(message: Message):
     file_id = None
     content_text = message.text or message.caption
     url = get_url(message)
+    media_group_id = None
 
     if message.photo:
         content_type = "photo"
@@ -49,8 +50,12 @@ def get_content_info(message: Message):
     # Получние истоничка репоста
     if message.forward_from_chat and message.forward_from_chat.title:
         origin = message.forward_origin.chat.title
+        origin_name = message.forward_from_chat.username
     else:
         origin = None
+
+    if message.media_group_id:
+        media_group_id = message.media_group_id
 
     # Получение сслыки на оригинал репоста
     if message.forward_from_chat and message.forward_from_chat.username and message.forward_from_message_id:
@@ -63,7 +68,10 @@ def get_content_info(message: Message):
         file_id=file_id,
         content_text=content_text,
         url=url, origin=origin,
-        origin_url=origin_url
+        origin_url=origin_url,
+        origin_name=origin_name,
+        media_group_id=media_group_id,
+        media_items=[{'content_type': content_type, 'file_id': file_id}]
     )
 
     return content_info

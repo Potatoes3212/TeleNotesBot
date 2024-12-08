@@ -8,7 +8,7 @@ from uuid import UUID
 
 
 @connection()
-async def add_repost(session, user_id: int, origin: str,  content_type: str,
+async def add_repost(session, user_id: int, origin_name: str, origin: str,  content_type: str,
                      content_text: Optional[str] = None, file_id: Optional[str] = None, origin_url: Optional[str] = None, url: Optional[str] = None) -> Optional[Repost]:
     try:
         user = await session.scalar(select(User).filter_by(id=user_id))
@@ -18,11 +18,12 @@ async def add_repost(session, user_id: int, origin: str,  content_type: str,
 
         new_repost = Repost(
             user_id=user_id,
+            origin_name=origin_name,
             origin=origin,
             content_type=content_type,
             content_text=content_text,
             file_id=file_id,
-            origin_url = origin_url,
+            origin_url=origin_url,
             url=url
         )
 

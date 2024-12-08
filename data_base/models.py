@@ -14,16 +14,20 @@ class User(Base):
     full_name: Mapped[str] = mapped_column(String, nullable=True)
 
     # Связи с заметками и напоминаниями
-    notes: Mapped[list["Note"]] = relationship("Note", back_populates="user", cascade="all, delete-orphan")
-    reposts: Mapped[list["Repost"]] = relationship("Repost", back_populates="user", cascade="all, delete-orphan")
+    notes: Mapped[list["Note"]] = relationship(
+        "Note", back_populates="user", cascade="all, delete-orphan")
+    reposts: Mapped[list["Repost"]] = relationship(
+        "Repost", back_populates="user", cascade="all, delete-orphan")
 
 
 # Модель для таблицы заметок
 class Note(Base):
     __table_args__ = {'schema': 'notes'}
 
-    id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid4)
-    user_id: Mapped[int] = mapped_column(ForeignKey('users.users.id'), nullable=False)
+    id: Mapped[UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid4)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey('users.users.id'), nullable=False)
     content_type: Mapped[str] = mapped_column(String, nullable=True)
     content_text: Mapped[str] = mapped_column(Text, nullable=True)
     file_id: Mapped[str] = mapped_column(String, nullable=True)
@@ -34,9 +38,11 @@ class Note(Base):
 class Repost(Base):
     __table_args__ = {'schema': 'reposts'}
 
-    id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid4)
-    user_id: Mapped[int] = mapped_column(ForeignKey('users.users.id'), nullable=False)
-    
+    id: Mapped[UUID] = mapped_column(
+        UUID(as_uuid=True), primary_key=True, default=uuid4)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey('users.users.id'), nullable=False)
+    origin_name: Mapped[str] = mapped_column(nullable=True)
     origin: Mapped[str] = mapped_column(String, nullable=False)
     content_type: Mapped[str] = mapped_column(String, nullable=True)
     content_text: Mapped[str] = mapped_column(Text, nullable=True)
