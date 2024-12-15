@@ -1,13 +1,15 @@
 import asyncio
 import re
 
-from aiogram.types import Message
+from aiogram import Bot
+from aiogram.types import Message, InputMediaAudio, InputMediaVideo, InputMediaDocument, InputMediaPhoto
 from typing import Optional
 from keyboards.note_kb.reply_note_kb import rule_note_kb
 from keyboards.repost_kb.reply_repost_kb import del_repost_kb
 from models.logic_models import ContentInfo
 from operator import attrgetter
 from create_bot import logger
+from data_base.models import Repost
 
 
 def transform_string(input_string):
@@ -91,7 +93,7 @@ def get_url(message: Message) -> str | None:
     return None
 
 
-async def send_message_user(bot, user_id, content_type, content_text=None, file_id=None, kb=None):
+async def send_message_user(bot: Bot, user_id, content_type, content_text=None, file_id=None, kb=None):
     if content_type == 'text':
         await bot.send_message(chat_id=user_id, text=content_text, parse_mode='HTML', reply_markup=kb)
     elif content_type == 'photo':
@@ -104,6 +106,30 @@ async def send_message_user(bot, user_id, content_type, content_text=None, file_
         await bot.send_audio(chat_id=user_id, audio=file_id, caption=content_text, parse_mode='HTML', reply_markup=kb)
     elif content_type == 'voice':
         await bot.send_voice(chat_id=user_id, voice=file_id, caption=content_text, parse_mode='HTML', reply_markup=kb)
+
+
+async def send_repost_user(bot: Bot, repost: Repost, caption: str, kb=None):
+
+    media = []
+
+    for idx, item in enumerate(repost.media):
+        content_type = item['content_type']
+        file_id = item['file_id']
+
+        if content_type == 'photo':
+            media.append(InputMediaPhoto(
+                media=file_id, caption=caption if idx == 0 else None, parse_mode='HTML'))
+        elif content_type == 'document':
+            media.append(InputMediaDocument(
+                media=file_id, caption=caption if idx == 0 else None, parse_mode='HTML'))
+        elif content_type == 'video':
+            media.append(InputMediaVideo(
+                media=file_id, caption=caption if idx == 0 else None, parse_mode='HTML'))
+        elif content_type == 'audio':
+            media.append(InputMediaAudio(
+                media=file_id, caption=caption if idx == 0 else None, parse_mode='HTML'))
+    await bot.send_media_group(chat_id=repost.user_id, media=media)
+    # await bot.send_message(chat_id=repost.user_id, text="Выбери действие:", reply_markup=kb)
 
 
 async def send_many_notes(all_notes, bot, user_id):
@@ -141,7 +167,7 @@ async def send_many_reposts(all_reposts, bot, user_id):
             await asyncio.sleep(0.5)
 
 
-def create_repost_sending_text(repost, title: Optional[str] = None) -> str:
+def create_repost_sending_text(repost: Repost, title: Optional[str] = None) -> str:
 
     text = []
 

@@ -1,7 +1,7 @@
 from sqlalchemy import BigInteger, Integer, Text, ForeignKey, String
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from data_base.database import Base
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 from uuid import uuid4
 
 
@@ -49,4 +49,5 @@ class Repost(Base):
     file_id: Mapped[str] = mapped_column(String, nullable=True)
     url: Mapped[str] = mapped_column(String, nullable=True)
     origin_url: Mapped[str] = mapped_column(String, nullable=True)
+    media: Mapped[list[dict]] = mapped_column(JSONB, nullable=True)
     user: Mapped["User"] = relationship("User", back_populates="reposts")
