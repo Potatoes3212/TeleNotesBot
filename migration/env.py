@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 
 from data_base.database import Base, DATABASE_URL
-from data_base.models import User, Note
+from data_base.models import User, Note, Repost
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -31,6 +31,12 @@ target_metadata = Base.metadata
 # ... etc.
 
 
+def include_name(name, type_, parent_names):
+    if type_ == "schema":
+        return name in ["users", "notes", "reposts"]
+    return True
+
+
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
 
@@ -48,7 +54,8 @@ def run_migrations_offline() -> None:
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
-        dialect_opts={"paramstyle": "named"},
+        include_schemas=True,
+        include_name=include_name
     )
 
     with context.begin_transaction():
@@ -56,8 +63,12 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection: Connection) -> None:
-    context.configure(connection=connection, target_metadata=target_metadata)
-
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        include_schemas=True,
+        include_name=include_name
+    )
     with context.begin_transaction():
         context.run_migrations()
 
@@ -67,7 +78,6 @@ async def run_async_migrations() -> None:
     and associate a connection with the context.
 
     """
-
     connectable = async_engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
